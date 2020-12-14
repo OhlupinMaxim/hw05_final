@@ -14,9 +14,6 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    class Meta:
-        ordering = ("-pub_date",)
-
     text = models.TextField(verbose_name="Текст",
                             help_text="Здесь будет текст вашего поста")
     pub_date = models.DateTimeField("date published",
@@ -27,16 +24,16 @@ class Post(models.Model):
                               related_name="group_posts",
                               blank=True, null=True, verbose_name="Группа",
                               help_text="Выберете группу")
-    image = models.ImageField(upload_to='posts/', blank=True, null=True)
+    image = models.ImageField(upload_to="posts/", blank=True, null=True)
+
+    class Meta:
+        ordering = ("-pub_date",)
 
     def __str__(self):
         return self.text[:15]
 
 
 class Comment(models.Model):
-    class Meta:
-        ordering = ("-created",)
-
     post = models.ForeignKey(Post, on_delete=models.CASCADE,
                              related_name="comments")
     author = models.ForeignKey(User, on_delete=models.CASCADE,
@@ -46,11 +43,15 @@ class Comment(models.Model):
     created = models.DateTimeField("date published",
                                    auto_now_add=True, db_index=True)
 
+    class Meta:
+        ordering = ("-created",)
+
     def __str__(self):
         return self.text[:15]
 
 
 class Follow(models.Model):
+    models.UniqueConstraint(fields=["user", "author"], name="uniq_follow")
     user = models.ForeignKey(User, on_delete=models.CASCADE,
                              related_name="follower")
     author = models.ForeignKey(User, on_delete=models.CASCADE,

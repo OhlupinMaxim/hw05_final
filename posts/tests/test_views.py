@@ -24,8 +24,8 @@ class PostsViewTests(PostBaseTestCase):
         Post.objects.create(
             text="text NEW",
             pub_date='23.11.2020',
-            author=User.objects.get(username='another_author'),
-            group=Group.objects.get(slug="slug"),
+            author=User.objects.filter(username='another_author').first(),
+            group=Group.objects.filter(slug="slug").first(),
         )
         response = self.guest_client.get(reverse('index'))
         self.assertEqual(context, response.context)
@@ -108,3 +108,12 @@ class PostsViewTests(PostBaseTestCase):
                     kwargs={
                         "username": self.another_user}))
         self.assertEqual(response_guest.status_code, 302)
+
+    def test_unfollow(self):
+        response_auth = self.authorized_client.get(
+            reverse("profile_unfollow",
+                    kwargs={
+                        "username": self.another_user}))
+        self.assertEqual(response_auth.status_code, 302)
+        self.assertFalse(Follow.objects.filter(
+            user=self.user, author=self.another_user).exists())

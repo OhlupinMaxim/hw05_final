@@ -1,6 +1,6 @@
-from .models import Post, Comment
+from django import forms
 
-from .validators import *
+from .models import Post, Comment, Group
 
 
 class PostForm(forms.ModelForm):
@@ -14,8 +14,8 @@ class PostForm(forms.ModelForm):
 
     text = forms.CharField(widget=forms.Textarea(
         attrs={"placeholder": "Введите текст"}), required=True,
-        validators=[validate_not_empty], label="Введите текст")
-    group = forms.SelectMultiple(choices=list(Group.objects.values('title')))
+        label="Введите текст")
+    group = forms.SelectMultiple(choices=list(Group.objects.values("title")))
 
 
 class CommentForm(forms.ModelForm):
@@ -24,5 +24,5 @@ class CommentForm(forms.ModelForm):
         fields = ("text",)
 
     text = forms.CharField(widget=forms.Textarea(
-        attrs={"placeholder": "Введите текст"}), required=True,
-        validators=[validate_not_empty], label="Введите текст")
+        attrs={"placeholder": "Введите текст"}),
+        required=True, label="Введите текст")

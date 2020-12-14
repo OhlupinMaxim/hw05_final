@@ -6,55 +6,14 @@
 
 <main role="main" class="container">
     <div class="row">
-            <div class="col-md-3 mb-3 mt-1">
-                    <div class="card">
-                            <div class="card-body">
-                                    <div class="h2">
-                                        {{ author.get_full_name }}
-                                    </div>
-                                    <div class="h3 text-muted">
-                                        {{ author.username }}
-                                    </div>
-                            </div>
-                            <ul class="list-group list-group-flush">
-                                    <li class="list-group-item">
-                                            <div class="h6 text-muted">
-                                            Подписчиков: {{ following }} <br />
-                                            Подписан: {{ follower }}
-                                            </div>
-                                    </li>
-                                    <li class="list-group-item">
-                                            <div class="h6 text-muted">
-                                                <!-- Количество записей -->
-                                                Записей: {{ post.count }}
-                                            </div>
-                                    </li>
-                                {% if user.is_authenticated %}
-                                {% if user != author %}
-                                <li class="list-group-item">
-                                    {% if is_followed == False %}
-                                    <a class="btn btn-lg btn-primary"
-                                        href="{% url 'profile_follow' author.username %}" role="button">
-                                            Подписаться
-                                    </a>
-                                    {% else %}
-                                    <a class="btn btn-lg btn-light"
-                                        href="{% url 'profile_unfollow' author.username %}" role="button">
-                                            Отписаться
-                                    </a>
-                                    {% endif %}
-                                </li>
-                                {% endif %}
-                                {% endif %}
-                            </ul>
-                    </div>
-            </div>
+        {% include "include/profile_item.html" %}
+
         <div class="col-md-9">
                 {% for post in page %}
-                {% include "post_item.html" with post=post %}
+                {% include "include/post_item.html" with post=post %}
                 {% endfor %}
                 {% if page.has_other_pages %}
-                {% include "paginator.html" with user=user items=page paginator=paginator%}
+                {% include "include/paginator.html" with user=user items=page paginator=paginator%}
                 {% endif %}
         </div>
     </div>

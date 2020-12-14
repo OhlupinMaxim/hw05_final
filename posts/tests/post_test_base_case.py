@@ -1,5 +1,6 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client
+from django.urls import reverse
 
 from posts.models import Post, Group, User
 
@@ -38,33 +39,38 @@ class PostBaseTestCase(TestCase):
         Post.objects.create(
             text="text",
             pub_date='23.11.2020',
-            author=User.objects.get(username='author'),
-            group=Group.objects.get(slug="slug"),
+            author=User.objects.filter(username='author').first(),
+            group=Group.objects.filter(slug="slug").first(),
         )
 
         Post.objects.create(
             text="text_another_author",
             pub_date='23.11.2020',
-            author=User.objects.get(username='another_author'),
-            group=Group.objects.get(slug="slug"),
+            author=User.objects.filter(username='another_author').first(),
+            group=Group.objects.filter(slug="slug").first(),
         )
-        cls.post = Post.objects.get(id=1)
-        cls.group = Group.objects.get(slug='slug')
-        cls.another_group = Group.objects.get(slug='another_slug')
+        cls.post = Post.objects.filter(text="text").first()
+        cls.group = Group.objects.filter(slug='slug').first()
+        cls.another_group = Group.objects.filter(slug='another_slug').first()
 
         cls.urls = {
-            "index.html": "/",
-            "group_list.html": "/group/",
-            "group.html": "/group/slug/",
+            "index.html": reverse("index"),
+            "group_list.html": reverse("group"),
+            "group.html": reverse("group_slug", kwargs={"slug": "slug"}),
         }
         cls.urls_auth = {
-            "index.html": "/",
-            "group_list.html": "/group/",
-            "group.html": "/group/slug/",
-            "new_post.html": "/new/",
-            "profile.html": f"/{cls.user.username}/",
-            "post.html": f"/{cls.user.username}/{str(cls.post.pk)}/",
-            "post_edit.html": f"/{cls.user.username}/{str(cls.post.pk)}/edit/",
+            "index.html": reverse("index"),
+            "group_list.html": reverse("group"),
+            "group.html": reverse("group_slug",
+                                  kwargs={"slug": cls.group.slug}),
+            "new_post.html": reverse("new_post"),
+            "profile.html": reverse("profile",
+                                    kwargs={"username": cls.user.username}),
+            "post.html": reverse("post", kwargs={"username": cls.user.username,
+                                                 "post_id": cls.post.pk}),
+            "post_edit.html": reverse("post_edit",
+                                      kwargs={"username": cls.user.username,
+                                              "post_id": cls.post.pk}),
         }
         cls.img1 = SimpleUploadedFile(name='test1.jpg',
                                       content=open('posts/tests/test1.jpg',

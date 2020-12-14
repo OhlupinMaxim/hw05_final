@@ -14,7 +14,7 @@
 {% endfor %}
 
 {% if groups.has_other_pages %}
-  {% include "paginator.html" with items=groups paginator=paginator%}
+  {% include "include/paginator.html" with items=groups paginator=paginator%}
 {% endif %}
 {% endblock %}
 

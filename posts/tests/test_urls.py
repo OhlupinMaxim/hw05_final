@@ -1,5 +1,6 @@
 from django.core.cache import cache
 from django.test import TestCase, Client
+from django.urls import reverse
 
 from posts.tests.post_test_base_case import PostBaseTestCase
 
@@ -52,8 +53,10 @@ class PostsURLTests(PostBaseTestCase):
 
     def test_url_guest_redirect(self):
         guest_client = self.guest_client
-        urls = (f"/{self.user.username}/",
-                f"/{self.user.username}/{str(self.post.pk)}/")
+        urls = (reverse("profile", kwargs={"username": self.user.username}),
+                reverse("post",
+                        kwargs={"username": self.user.username,
+                                "post_id": self.post.id}))
         for url in urls:
             with self.subTest():
                 response_status = guest_client.get(url).status_code
@@ -61,6 +64,10 @@ class PostsURLTests(PostBaseTestCase):
 
     def test_url_another_author_user(self):
         another_auth_user = self.another_auth_user
-        url = f"/{self.user.username}/{str(self.post.pk)}/edit"
-        response_status = another_auth_user.get(url).status_code
-        self.assertEqual(response_status, 301)
+        response_status = another_auth_user.get(
+            reverse("post_edit",
+                    kwargs={
+                        "username": self.user.username,
+                        "post_id": self.post.pk
+                    })).status_code
+        self.assertEqual(response_status, 302)

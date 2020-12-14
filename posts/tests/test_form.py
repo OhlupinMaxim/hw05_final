@@ -34,32 +34,34 @@ class PostsFormTests(PostBaseTestCase):
             "image": self.img2,
         }
         response = self.authorized_client.post(
-            reverse('post_edit', kwargs={"username": self.user.username,
+            reverse("post_edit", kwargs={"username": self.user.username,
                                          "post_id": self.post.id}),
             data=form_data,
             follow=True
         )
         self.assertEqual(count, Post.objects.count())
-        self.assertRedirects(response,
-                             f"/{self.user.username}/{str(self.post.id)}/")
-        post = Post.objects.get(id=self.post.id)
+        self.assertRedirects(response, reverse(
+            "post",
+            kwargs={"username": self.user.username,
+                    "post_id": self.post.id}))
+        post = Post.objects.filter(author=self.user).first()
         self.assertEqual(post.text, form_data["text"])
         self.assertEqual(post.group, self.another_group)
         self.assertEqual(post.image.size, self.img2.size)
 
     def test_add_comment(self):
-        response_guest = self.guest_client.get(reverse('add_comment', kwargs={
+        response_guest = self.guest_client.get(reverse("add_comment", kwargs={
             "username": self.user.username,
             "post_id": self.post.id
         }))
         self.assertEqual(response_guest.status_code, 302)
         form_data = {"text": "new comment"}
         response_auth = self.authorized_client.post(reverse(
-            'add_comment', kwargs={
+            "add_comment", kwargs={
                 "username": self.user.username,
                 "post_id": self.post.id
             }),
             data=form_data,
             follow=True
         )
-        self.assertEqual(Comment.objects.first().text, form_data['text'])
+        self.assertEqual(Comment.objects.first().text, form_data["text"])

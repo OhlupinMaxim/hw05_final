@@ -1,37 +1,31 @@
+from django.contrib.flatpages.models import FlatPage
+from django.contrib.sites.models import Site
 from django.core.cache import cache
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from posts.tests.post_test_base_case import PostBaseTestCase
 
 
-class StaticURLTests(TestCase):
-
-    def setUp(self):
-        self.guest_client = Client()
+class PostsURLTests(PostBaseTestCase):
 
     def test_homepage(self):
-        response = self.guest_client.get('/')
+        response = self.guest_client.get(reverse("index"))
         self.assertEqual(response.status_code, 200)
 
-    def test_about_author(self):
-        response = self.guest_client.get("/about-author")
-        self.assertEqual(response.status_code, 301)
-
-    def test_about_technology(self):
-        response = self.guest_client.get("/about-technology")
-        self.assertEqual(response.status_code, 301)
+    def test_flat_pages(self):
+        for url in self.static_pages:
+            with self.subTest():
+                response = self.guest_client.get(url)
+                self.assertEqual(response.status_code, 301, f'url: {url}')
 
     def test_page_not_found(self):
-        response = self.guest_client.get("/404")
-        self.assertEqual(response.status_code, 301)
+        response = self.guest_client.get(reverse("Error_404"))
+        self.assertEqual(response.status_code, 404)
 
     def test_page_server_error(self):
-        response = self.guest_client.get("/500")
-        self.assertEqual(response.status_code, 301)
-
-
-class PostsURLTests(PostBaseTestCase):
+        response = self.guest_client.get(reverse("Error_500"))
+        self.assertEqual(response.status_code, 500)
 
     def test_urls_anonymous_user(self):
         cache.clear()

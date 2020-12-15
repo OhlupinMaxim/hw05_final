@@ -1,6 +1,12 @@
+import io
+
+from django.contrib.flatpages.models import FlatPage
+from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, Client
+from django.test import TestCase, Client, modify_settings
 from django.urls import reverse
+
+from PIL import Image
 
 from posts.models import Post, Group, User
 
@@ -72,11 +78,30 @@ class PostBaseTestCase(TestCase):
                                       kwargs={"username": cls.user.username,
                                               "post_id": cls.post.pk}),
         }
+        buf = io.BytesIO()
+        imageBytes = Image.new("RGB", (100, 100),
+                               (205, 205, 205)).save(buf, format="jpeg")
         cls.img1 = SimpleUploadedFile(name='test1.jpg',
-                                      content=open('posts/tests/test1.jpg',
-                                                   'rb').read(),
+                                      content=buf.getvalue(),
                                       content_type='image/jpeg')
+        buf = io.BytesIO()
+        imageBytes = Image.new("RGB", (10, 10),
+                               (255, 255, 255)).save(buf, format="jpeg")
         cls.img2 = SimpleUploadedFile(name='test2.jpg',
-                                      content=open('posts/tests/test2.jpg',
-                                                   'rb').read(),
+                                      content=buf.getvalue(),
                                       content_type='image/jpeg')
+
+        cls.flat_about = FlatPage.objects.create(
+            url='about-author/',
+            title='about',
+            content='<b>content</b>'
+        )
+        cls.flat_tech = FlatPage.objects.create(
+            url='about-technology/',
+            title='terms',
+            content='<b>content</b>'
+        )
+        site = Site.objects.get(pk=1)
+        cls.flat_about.sites.add(site)
+        cls.flat_tech.sites.add(site)
+        cls.static_pages = ('/about-author', '/about-technology')
